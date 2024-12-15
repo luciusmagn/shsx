@@ -1,5 +1,5 @@
 (library (shsx)
-  (export hsx defcomp render-to-string
+  (export shsx defcomp render-to-string
           ;; re-export all HTML elements
           +a +abbr +address +area +article +aside +audio +b +base +bdi +bdo
           +blockquote +body +br +button +canvas +caption +cite +code +col
@@ -16,5 +16,3 @@
           (shsx element)
           (shsx dsl)
           (shsx builtin)))
-
-s

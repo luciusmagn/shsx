@@ -20,7 +20,8 @@
        (begin
          (define (name . args)
            (make-element (string->symbol
-                          (substring (symbol->string 'name) 1))  ; remove +
+                          ;; TODO: This is retarded
+                          (substring (symbol->string 'name) 1 (string-length (symbol->string 'name))))  ; remove +
                          args
                          '()))
          ...)]))
