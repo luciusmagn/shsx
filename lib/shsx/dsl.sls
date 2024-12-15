@@ -1,5 +1,5 @@
 (library (shsx dsl)
-  (export hsx defcomp)
+  (export shsx defcomp)
   (import (rnrs)
           (shsx element))
 
