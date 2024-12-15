@@ -1,0 +1,8 @@
+*.so
+*.ss~
+*.ss#
+*.scm~
+*.scm#
+.#*
+*.fasl
+.DS_Store
