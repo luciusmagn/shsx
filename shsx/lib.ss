@@ -2,8 +2,7 @@
 (import :std/error
         :std/sugar
         :std/format
-        :std/misc/string
-        :std/srfi/113)
+        :std/misc/string)
 (export #t)
 
 (def self-closing-tags
@@ -17,11 +16,13 @@
   (match expr
     ((? string?) expr)
     ((? symbol?) (symbol->string expr))
+    ((cons '@if (cons condition (cons then else)))
+     (apply render-html (if condition then else)))
     ((cons tag attrs-and-children)
      (let* ((tag-name (keyword->tagname tag))
             (attrs+children (parse-attrs+children attrs-and-children)))
        (if (memq tag self-closing-tags)
-         (format "<~a~a>"
+         (format "<~a~a/>"
                  tag-name
                  (render-attrs (car attrs+children)))
          (format "<~a~a>~a</~a>"
