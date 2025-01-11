@@ -53,17 +53,22 @@
       (input: type: "submit" value: "Send"))))))
 
 
-(def admin? #f)  ; try changing this to #t
+(def admin? #f)  ; try changing these
+(def email-verified? #t)
+(def has-notifications? #t)
+(def notification-count 7)
+(def maintenance-mode? #t)
+(def premium-user? #t)
 
 (def example-page3
   (shsx
    (div: class: "content"
          (h1: "Welcome")
-         (@if ,admin?
-           (div: class: "admin-panel"
-                 (h2: "Admin Controls")
-                 (button: "Delete Stuff"))
-           (p: "Please log in as admin"))
+         ,(@if admin?
+            (div: class: "admin-panel"
+                  (h2: "Admin Controls")
+                  (button: "Delete Stuff"))
+            (p: "Please log in as admin"))
          (footer: "Always visible"))))
 
 
@@ -75,21 +80,21 @@
   (shsx
    (div: class: "app"
          ;; Nested @if
-         (@if ,logged-in?
-           (div: class: "profile"
-                 (h2: "Welcome back!")
-                 (@if ,admin?
-                   (span: class: "badge" "Admin")
-                   (span: class: "badge" "User")))
-           (div: class: "login-prompt"
-                 (h2: "Please log in")))
+         ,(@if logged-in?
+            (div: class: "profile"
+                  (h2: "Welcome back!")
+                  ,(@if admin?
+                     (span: class: "badge" "Admin")
+                     (span: class: "badge" "User")))
+            (div: class: "login-prompt"
+                  (h2: "Please log in")))
 
          ;; @if with empty branch
-         (@if ,(null? posts)
-           (p: "No posts yet!")
-           (div: class: "posts"
-                 (h3: "Recent Posts")
-                 (p: ,(car posts))))
+         ,(@if (null? posts)
+            (p: "No posts yet!")
+            (div: class: "posts"
+                  (h3: "Recent Posts")
+                  (p: ,(car posts))))
 
          ;; @if affecting attributes
          (div: class: ,(string-append
@@ -98,17 +103,17 @@
                (p: "Theme-aware content"))
 
          ;; @if with self-closing tags
-         (@if ,logged-in?
-           (img: src: "avatar.jpg" alt: "Your avatar")
-           (img: src: "default-avatar.jpg" alt: "Default avatar"))
+         ,(@if logged-in?
+            (img: src: "avatar.jpg" alt: "Your avatar")
+            (img: src: "default-avatar.jpg" alt: "Default avatar"))
 
          ;; Multiple conditions in sequence
-         (@if ,admin?
-           (button: class: "danger" "Delete")
-           (button: class: "primary" "Edit"))
-         (@if ,logged-in?
-           (button: "Logout")
-           (button: "Login")))))
+         ,(@if admin?
+            (button: class: "danger" "Delete")
+            (button: class: "primary" "Edit"))
+         ,(@if logged-in?
+            (button: "Logout")
+            (button: "Login")))))
 
 (def simple-test
   (shsx
@@ -150,13 +155,41 @@
                (p: "Content"))
             (p: "Not shown")))))
 
+(def user-state
+  (shsx
+   (div: class: "dashboard"
+         ,(@if logged-in?
+            ,(@begin
+               (nav: class: "user-nav"
+                     ,(@when admin?
+                        (a: href: "/admin" "Admin Panel"))
+                     (a: href: "/profile" "Profile")
+                     (a: href: "/logout" "Logout"))
+               ,(@unless email-verified?
+                  (div: class: "warning"
+                        (p: "Please verify your email")
+                        (button: "Resend verification"))))
+            ,(@begin
+               (h2: "Welcome Guest")
+               (a: href: "/login" "Log In")))
+         (main: class: "content"
+                ,(@when has-notifications?
+                   (div: class: "notifications"
+                         ,(@if (> notification-count 5)
+                            (p: class: "urgent" "You have many notifications!")
+                            (p: "You have new notifications"))))
+                ,(@unless maintenance-mode?
+                   (div: class: "features"
+                         (h3: "Available Features")
+                         ,(@when premium-user?
+                            (p: "Premium features enabled"))))))))
 
 ;; Interactive REPL
 (def (main . args)
-  ;;(displayln (render-html example-page))
-  ;;(displayln (render-html example-page2))
+  (displayln (render-html example-page))
+  (displayln (render-html example-page2))
   (displayln (render-html simple-test))
   (displayln (render-html begin-test))
-  (displayln (render-html when-unless-test)))
-;;(displayln (render-html example-page3))
-;;(displayln (render-html example-page4)))
+  (displayln (render-html when-unless-test))
+  (displayln (render-html example-page3))
+  (displayln (render-html example-page4)))
