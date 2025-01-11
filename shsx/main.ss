@@ -1,16 +1,28 @@
-;;; -*- Gerbil -*-
+;; -*- Gerbil -*-
 (import :std/error
         :std/sugar
         :std/format
         :std/srfi/13
         :std/misc/ports
+        :std/test
         "./lib")
 (export main)
 
 (include "../manifest.ss")
 
-;; Example of a more complex HTML structure
-(def example-page
+;; Test state variables
+(define admin? #f)
+(define email-verified? #t)
+(define has-notifications? #t)
+(define notification-count 7)
+(define maintenance-mode? #t)
+(define premium-user? #t)
+(define logged-in? #t)
+(define posts '("Post 1" "Post 2"))
+(define dark-mode? #t)
+
+;; Test fixtures
+(define example-page
   (shsx
    (html:
     (head:
@@ -34,7 +46,7 @@
      (footer: class: "footer"
               (p: "© 2024 SHSX Project"))))))
 
-(def example-page2
+(define self-closing-test
   (shsx
    (html:
     (head:
@@ -52,15 +64,7 @@
       (br:)
       (input: type: "submit" value: "Send"))))))
 
-
-(def admin? #f)  ; try changing these
-(def email-verified? #t)
-(def has-notifications? #t)
-(def notification-count 7)
-(def maintenance-mode? #t)
-(def premium-user? #t)
-
-(def example-page3
+(define if-test
   (shsx
    (div: class: "content"
          (h1: "Welcome")
@@ -71,15 +75,9 @@
             (p: "Please log in as admin"))
          (footer: "Always visible"))))
 
-
-(def logged-in? #t)
-(def posts '("Post 1" "Post 2"))
-(def dark-mode? #t)
-
-(def example-page4
+(define nested-if-test
   (shsx
    (div: class: "app"
-         ;; Nested @if
          ,(@if logged-in?
             (div: class: "profile"
                   (h2: "Welcome back!")
@@ -88,26 +86,18 @@
                      (span: class: "badge" "User")))
             (div: class: "login-prompt"
                   (h2: "Please log in")))
-
-         ;; @if with empty branch
          ,(@if (null? posts)
             (p: "No posts yet!")
             (div: class: "posts"
                   (h3: "Recent Posts")
                   (p: ,(car posts))))
-
-         ;; @if affecting attributes
          (div: class: ,(string-append
                         "theme-"
                         (if dark-mode? "dark" "light"))
                (p: "Theme-aware content"))
-
-         ;; @if with self-closing tags
          ,(@if logged-in?
             (img: src: "avatar.jpg" alt: "Your avatar")
             (img: src: "default-avatar.jpg" alt: "Default avatar"))
-
-         ;; Multiple conditions in sequence
          ,(@if admin?
             (button: class: "danger" "Delete")
             (button: class: "primary" "Edit"))
@@ -115,47 +105,40 @@
             (button: "Logout")
             (button: "Login")))))
 
-(def simple-test
+(define simple-if-test
   (shsx
    (div: class: "test-container"
-         ;; Basic @if
          ,(@if #t
             ,(@if #t
                (p: "Welcome back!")
                (p: "NS!"))
             (p: "Please log in")))))
 
-(def begin-test
+(define begin-test
   (shsx
    (div: class: "test-container"
-         ;; Basic @begin
          ,(@begin
             (p: "First paragraph")
             (p: "Second paragraph"))
-
-         ;; @begin with @if
          ,(@if #t
             ,(@begin
                (h1: "Title")
                (p: "Content"))
             (p: "Not shown")))))
 
-(def when-unless-test
+(define when-unless-test
   (shsx
    (div: class: "test-container"
-         ;; Basic @begin
          ,(@when #f
             (p: "First paragraph")
             (p: "Second paragraph"))
-
-         ;; @begin with @if
          ,(@if #t
             ,(@unless #f
                (h1: "Title")
                (p: "Content"))
             (p: "Not shown")))))
 
-(def user-state
+(define complex-test
   (shsx
    (div: class: "dashboard"
          ,(@if logged-in?
@@ -184,12 +167,36 @@
                          ,(@when premium-user?
                             (p: "Premium features enabled"))))))))
 
-;; Interactive REPL
-(def (main . args)
-  (displayln (render-html example-page))
-  (displayln (render-html example-page2))
-  (displayln (render-html simple-test))
-  (displayln (render-html begin-test))
-  (displayln (render-html when-unless-test))
-  (displayln (render-html example-page3))
-  (displayln (render-html example-page4)))
+(define (main . args)
+  (displayln "\nSHSX Test Suite")
+  (displayln "==============")
+
+  (run-test-suite!
+   (test-suite "Basic HTML Generation"
+     (test-case "Simple page structure"
+       (check (string? (render-html example-page)) => #t))
+
+     (test-case "Self-closing tags"
+       (check (string? (render-html self-closing-test)) => #t))))
+
+  (run-test-suite!
+   (test-suite "Control Flow Features"
+     (test-case "Simple @if"
+       (check (string? (render-html simple-if-test)) => #t))
+
+     (test-case "@begin directive"
+       (check (string? (render-html begin-test)) => #t))
+
+     (test-case "@when/@unless directives"
+       (check (string? (render-html when-unless-test)) => #t))))
+
+  (run-test-suite!
+   (test-suite "Complex Compositions"
+     (test-case "Basic @if test"
+       (check (string? (render-html if-test)) => #t))
+
+     (test-case "Nested @if test"
+       (check (string? (render-html nested-if-test)) => #t))
+
+     (test-case "Complex control flow"
+       (check (string? (render-html complex-test)) => #t)))))
