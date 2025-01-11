@@ -1,0 +1,109 @@
+#+title: Readme
+
+* SHSX (Scheme HTML S-expressions)
+A simple and powerful HTML generator for Gerbil Scheme.
+
+** Installation
+Add this to your =.gerbil/lib= directory or install directly from source:
+
+#+begin_src shell
+git clone https://github.com/luciusmagn/shsx
+cd shsx
+gxpkg install .
+#+end_src
+
+** Basic Usage
+SHSX uses a simple syntax where HTML elements are represented as S-expressions with colons:
+
+#+begin_src scheme
+(import :shsx/lib)
+
+(def example
+ (shsx
+  (div: class: "container"
+       (h1: "Welcome to SHSX")
+       (p: "This is an example paragraph."))))
+
+(displayln (render-html example))
+#+end_src
+
+This generates:
+#+begin_src html
+<div class="container">
+ <h1>Welcome to SHSX</h1>
+ <p>This is an example paragraph.</p>
+</div>
+#+end_src
+
+** Control Flow
+SHSX provides several control flow macros:
+
+*** @if
+Conditional rendering:
+#+begin_src scheme
+(def admin? #t)
+
+(shsx
+  (div:
+   ,(@if admin?
+      (p: "Admin panel")
+      (p: "Please log in"))))
+#+end_src
+
+*** @when and @unless
+One-sided conditions:
+#+begin_src scheme
+(shsx
+  (div:
+   ,(@when logged-in?
+      (p: "Welcome back!")
+      (button: "Logout"))
+   ,(@unless admin?
+      (p: "Regular user area"))))
+#+end_src
+
+*** @begin
+Group multiple elements without creating a wrapper:
+#+begin_src scheme
+(shsx
+  (div:
+   ,(@begin
+     (h1: "Title")
+     (p: "First paragraph")
+     (p: "Second paragraph"))))
+#+end_src
+
+** Self-closing Tags
+SHSX automatically handles self-closing tags like =img:=, =br:=, =input:=:
+
+#+begin_src scheme
+(shsx
+  (div:
+   (img: src: "cat.jpg" alt: "A cute cat")
+   (br:)
+   (input: type: "text" placeholder: "Enter name")))
+#+end_src
+
+** Dynamic Content
+You can unquote Scheme expressions inside SHSX:
+
+#+begin_src scheme
+(def name "Alice")
+(def items '("One" "Two" "Three"))
+
+(shsx
+  (div:
+   (h1: "Hello, " ,name "!")
+   (ul: class: ,(if (> (length items) 2) "big-list" "small-list")
+     (li: ,(car items))
+     (li: ,(cadr items)))))
+#+end_src
+
+** License
+Fair License
+
+Copyright © 2025 Lukáš Hozda
+
+Usage of the works is permitted provided that this instrument is retained with the works, so that any entity that uses the works is notified of this instrument.
+
+DISCLAIMER: THE WORKS ARE WITHOUT WARRANTY.
