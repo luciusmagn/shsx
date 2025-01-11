@@ -2,13 +2,17 @@
 (import :std/error
         :std/sugar
         :std/format
-        :std/misc/string)
+        :std/misc/string
+        :std/srfi/113)
 (export #t)
+
+(def self-closing-tags
+  '(area: base: br: col: embed: hr: img:
+    input: link: meta: param: source: track: wbr:))
 
 (define (keyword->tagname tag)
   (string-trim-suffix ":" (symbol->string (keyword->symbol tag))))
 
-;; Simple HTML generation from s-expressions
 (def (render-html expr)
   (match expr
     ((? string?) expr)
@@ -16,11 +20,15 @@
     ((cons tag attrs-and-children)
      (let* ((tag-name (keyword->tagname tag))
             (attrs+children (parse-attrs+children attrs-and-children)))
-       (format "<~a~a>~a</~a>"
-               tag-name
-               (render-attrs (car attrs+children))
-               (render-children (cdr attrs+children))
-               tag-name)))))
+       (if (memq tag self-closing-tags)
+         (format "<~a~a>"
+                 tag-name
+                 (render-attrs (car attrs+children)))
+         (format "<~a~a>~a</~a>"
+                 tag-name
+                 (render-attrs (car attrs+children))
+                 (render-children (cdr attrs+children))
+                 tag-name))))))
 
 (def (parse-attrs+children lst)
   (let loop ((rest lst) (attrs '()))
