@@ -2,7 +2,8 @@
 (import :std/error
         :std/sugar
         :std/format
-        :std/misc/string)
+        :std/misc/string
+        :std/srfi/113)
 (export #t)
 
 (def self-closing-tags
@@ -16,20 +17,21 @@
   (match expr
     ((? string?) expr)
     ((? symbol?) (symbol->string expr))
-    ((cons '@if (cons condition (cons then else)))
-     (apply render-html (if condition then else)))
     ((cons tag attrs-and-children)
      (let* ((tag-name (keyword->tagname tag))
             (attrs+children (parse-attrs+children attrs-and-children)))
        (if (memq tag self-closing-tags)
-         (format "<~a~a/>"
+         (format "<~a~a>"
                  tag-name
                  (render-attrs (car attrs+children)))
-         (format "<~a~a>~a</~a>"
-                 tag-name
-                 (render-attrs (car attrs+children))
-                 (render-children (cdr attrs+children))
-                 tag-name))))))
+         (if (eq? tag fragment:)
+           (format "~a"
+                   (render-children (cdr attrs+children)))
+           (format "<~a~a>~a</~a>"
+                   tag-name
+                   (render-attrs (car attrs+children))
+                   (render-children (cdr attrs+children))
+                   tag-name)))))))
 
 (def (parse-attrs+children lst)
   (let loop ((rest lst) (attrs '()))
@@ -59,3 +61,26 @@
 (defsyntax (shsx stx)
   (syntax-case stx ()
     ((shsx expr) #'`expr)))
+
+(defsyntax (@if stx)
+  (syntax-case stx ()
+    ((@if condition true false) #'(if condition
+                                    `true
+                                    `false))))
+
+(defsyntax (@begin stx)
+  (syntax-case stx ()
+    ((@begin children ...)
+     #'(shsx (fragment: children ...)))))
+
+(defsyntax (@when stx)
+  (syntax-case stx ()
+    ((@when condition children ...)
+     #'(@if condition
+        ,(@begin children ...)
+        (fragment:)))))
+
+(defsyntax (@unless stx)
+  (syntax-case stx ()
+    ((@unless condition children ...)
+     #'(@when (not condition) children ...))))

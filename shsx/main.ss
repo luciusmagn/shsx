@@ -110,9 +110,53 @@
            (button: "Logout")
            (button: "Login")))))
 
+(def simple-test
+  (shsx
+   (div: class: "test-container"
+         ;; Basic @if
+         ,(@if #t
+            ,(@if #t
+               (p: "Welcome back!")
+               (p: "NS!"))
+            (p: "Please log in")))))
+
+(def begin-test
+  (shsx
+   (div: class: "test-container"
+         ;; Basic @begin
+         ,(@begin
+            (p: "First paragraph")
+            (p: "Second paragraph"))
+
+         ;; @begin with @if
+         ,(@if #t
+            ,(@begin
+               (h1: "Title")
+               (p: "Content"))
+            (p: "Not shown")))))
+
+(def when-unless-test
+  (shsx
+   (div: class: "test-container"
+         ;; Basic @begin
+         ,(@when #f
+            (p: "First paragraph")
+            (p: "Second paragraph"))
+
+         ;; @begin with @if
+         ,(@if #t
+            ,(@unless #f
+               (h1: "Title")
+               (p: "Content"))
+            (p: "Not shown")))))
+
+
 ;; Interactive REPL
 (def (main . args)
-  (displayln (render-html example-page))
-  (displayln (render-html example-page2))
-  (displayln (render-html example-page3))
-  (displayln (render-html example-page4)))
+  ;;(displayln (render-html example-page))
+  ;;(displayln (render-html example-page2))
+  (displayln (render-html simple-test))
+  (displayln (render-html begin-test))
+  (displayln (render-html when-unless-test)))
+;;(displayln (render-html example-page3))
+;;(displayln (render-html example-page4)))
