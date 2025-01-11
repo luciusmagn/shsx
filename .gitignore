@@ -1,8 +1,4 @@
-*.so
-*.ss~
-*.ss#
-*.scm~
-*.scm#
-.#*
-*.fasl
-.DS_Store
+*~
+build-deps
+/manifest.ss
+.gerbil
