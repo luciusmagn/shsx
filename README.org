@@ -18,7 +18,7 @@ SHSX uses a simple syntax where HTML elements are represented as S-expressions w
 #+begin_src scheme
 (import :shsx/lib)
 
-(def example
+(define example
  (shsx
   (div: class: "container"
        (h1: "Welcome to SHSX")
@@ -41,7 +41,7 @@ SHSX provides several control flow macros. Only the macro itself has to be unquo
 *** @if
 Conditional rendering:
 #+begin_src scheme
-(def admin? #t)
+(define admin? #t)
 
 (shsx
   (div:
@@ -88,8 +88,8 @@ SHSX automatically handles self-closing tags like =img:=, =br:=, =input:=:
 You can unquote Scheme expressions inside SHSX:
 
 #+begin_src scheme
-(def name "Alice")
-(def items '("One" "Two" "Three"))
+(define name "Alice")
+(define items '("One" "Two" "Three"))
 
 (shsx
   (div:
