@@ -6,14 +6,14 @@
         :std/srfi/113)
 (export #t)
 
-(def self-closing-tags
+(define self-closing-tags
   '(area: base: br: col: embed: hr: img:
     input: link: meta: param: source: track: wbr:))
 
 (define (keyword->tagname tag)
   (string-trim-suffix ":" (symbol->string (keyword->symbol tag))))
 
-(def (render-html expr)
+(define (render-html expr)
   (match expr
     ((? string?) expr)
     ((? symbol?) (symbol->string expr))
@@ -33,7 +33,7 @@
                    (render-children (cdr attrs+children))
                    tag-name)))))))
 
-(def (parse-attrs+children lst)
+(define (parse-attrs+children lst)
   (let loop ((rest lst) (attrs '()))
     (match rest
       ((cons (? keyword? k) (cons v more))
@@ -41,7 +41,7 @@
       (children
        (cons (reverse attrs) children)))))
 
-(def (render-attrs attrs)
+(define (render-attrs attrs)
   (if (null? attrs)
     ""
     (string-append
@@ -54,7 +54,7 @@
            attrs)
       " "))))
 
-(def (render-children children)
+(define (render-children children)
   (string-join (map render-html children) ""))
 
 ;; quasiqoute lmao
