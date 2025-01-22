@@ -99,6 +99,42 @@ You can unquote Scheme expressions inside SHSX:
      (li: ,(cadr items)))))
 #+end_src
 
+** Quasiquoting in SHSX
+SHSX uses standard Scheme quasiquoting syntax to interpolate dynamic content:
+
+*** Single Unquote (,)
+Used to evaluate expressions, including control flow macros:
+#+begin_src scheme
+(define name "Alice")
+(define admin? #t)
+
+(shsx
+ (div:
+   (h1: "Hello, " ,name "!")
+   ,(@when admin?  ; Control macros use simple unquote
+      (button: "Delete")
+      (button: "Edit"))))
+#+end_src
+
+*** Unquote-Splicing (,@)
+Used to splice lists of elements directly into parent:
+#+begin_src scheme
+(define items '("One" "Two"))
+(shsx
+ (ul:
+   ,@(map (lambda (x)
+           (li: x))
+         items)))
+;; Generates:
+;; <ul>
+;;   <li>One</li>
+;;   <li>Two</li>
+;; </ul>
+
+;; Without ,@ would generate invalid:
+;; <ul>((li: "One") (li: "Two"))</ul>
+#+end_src
+
 ** License
 Fair License
 
