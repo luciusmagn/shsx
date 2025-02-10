@@ -3,8 +3,35 @@
         :std/sugar
         :std/format
         :std/misc/string
+        :std/srfi/13
         :std/srfi/113)
 (export #t)
+
+(define sanitize-pairs
+  '(("&"  . "&amp;")
+    ("<"  . "&lt;")
+    (">"  . "&gt;")
+    ("\"" . "&quot;")
+    ("'"  . "&#39;")))
+
+(define (string-replace-str source old new)
+  (let loop ((pos 0)
+             (result ""))
+    (let ((idx (string-contains source old pos)))
+      (if idx
+        (loop (+ idx (string-length old))
+              (string-append result
+                             (substring source pos idx)
+                             new))
+        (string-append result
+                       (substring source pos (string-length source)))))))
+
+
+(define (sanitize str)
+  (foldl (lambda (pair acc)
+           (string-replace-str acc (car pair) (cdr pair)))
+         str
+         sanitize-pairs))
 
 (define self-closing-tags
   '(area: base: br: col: embed: hr: img:

@@ -35,6 +35,21 @@ This generates:
 </div>
 #+end_src
 
+You need to use unquoting to insert values into the template.
+
+#+BEGIN_SRC scheme
+(shsx
+ (p: class: ,my-classes "Hello!"))
+#+END_SRC
+
+If you are inserting from a variable with user data, make sure to sanitize
+the string:
+
+#+BEGIN_SRC scheme
+(shsx
+ (blockquote: ,(sanitize user-input)))
+#+END_SRC
+
 ** Control Flow
 SHSX provides several control flow macros. Only the macro itself has to be unquoted, not the condition or the branches
 
