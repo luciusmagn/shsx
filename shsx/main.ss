@@ -167,6 +167,18 @@
                          ,(@when premium-user?
                             (p: "Premium features enabled"))))))))
 
+
+(define predicate-test
+  (let* ((raw-expr `(div: (p: "Hello")))
+         (template-expr (shsx (div: (p: "Hello")))))
+    (shsx
+     (div: class: "test-results"
+           (h2: "Predicate Test")
+           (p: "Raw expression is template: "
+               ,(if (shsx-template? raw-expr) "true" "false"))
+           (p: "Template expression is template: "
+               ,(if (shsx-template? template-expr) "true" "false"))))))
+
 (define (main . args)
   (displayln "\nSHSX Test Suite")
   (displayln "==============")
@@ -199,4 +211,11 @@
        (check (string? (render-html nested-if-test)) => #t))
 
      (test-case "Complex control flow"
-       (check (string? (render-html complex-test)) => #t)))))
+       (check (string? (render-html complex-test)) => #t))))
+
+  (run-test-suite!
+   (test-suite "Predicate test"
+     (test-case "Template predicate"
+       (check (shsx-template? (shsx (div:))) => #t)
+       (check (shsx-template? '(div:)) => #f)
+       (check (string? (render-html predicate-test)) => #t)))))

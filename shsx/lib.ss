@@ -4,6 +4,7 @@
         :std/format
         :std/misc/string
         :std/srfi/13
+        :std/srfi/9
         :std/srfi/113)
 (export #t)
 
@@ -26,7 +27,6 @@
         (string-append result
                        (substring source pos (string-length source)))))))
 
-
 (define (sanitize str)
   (foldl (lambda (pair acc)
            (string-replace-str acc (car pair) (cdr pair)))
@@ -40,8 +40,10 @@
 (define (keyword->tagname tag)
   (string-trim-suffix ":" (symbol->string (keyword->symbol tag))))
 
+
 (define (render-html expr)
   (match expr
+    ((? shsx-template? template) (render-html (sexp template)))
     ((? string?) expr)
     ((? symbol?) (symbol->string expr))
     ((cons tag attrs-and-children)
@@ -84,10 +86,15 @@
 (define (render-children children)
   (string-join (map render-html children) ""))
 
+(define-record-type <shsx-template>
+  (shsx-template sexp)
+  shsx-template?
+  (sexp          sexp))
+
 ;; quasiqoute lmao
 (defsyntax (shsx stx)
   (syntax-case stx ()
-    ((shsx expr) #'`expr)))
+    ((shsx expr) #'(shsx-template `expr))))
 
 (defsyntax (@if stx)
   (syntax-case stx ()
