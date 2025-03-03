@@ -150,6 +150,26 @@ Used to splice lists of elements directly into parent:
 ;; <ul>((li: "One") (li: "Two"))</ul>
 #+end_src
 
+
+** Predicate and sanitization
+You can test whether something is a SHSX template using the =shsx-template?= predicate:
+
+#+BEGIN_SRC scheme
+(shsx-template? (shsx (div:))) => #t
+(shsx-template? '(div:)) => #f
+#+END_SRC
+
+And you can sanitize strings with =sanitize=
+
+#+BEGIN_SRC scheme
+(test-case "String sanitization"
+  (check (equal? (sanitize "<script>") "&lt;script&gt;") => #t)
+  (check (equal? (sanitize "a & b") "a &amp; b") => #t)
+  (check (equal? (sanitize "\"quote\" and 'apostrophe'")
+                 "&quot;quote&quot; and &#39;apostrophe&#39;") => #t)
+  (check (string? (render-html sanitize-test)) => #t))
+#+END_SRC
+
 ** License
 Fair License
 

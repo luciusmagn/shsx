@@ -179,6 +179,18 @@
            (p: "Template expression is template: "
                ,(if (shsx-template? template-expr) "true" "false"))))))
 
+(define sanitize-test
+  (let* ((unsafe-input "<script>alert('XSS attack');</script>")
+         (user-comment "I love the tag <div> & the attribute \"class\"!")
+         (sanitized-comment (sanitize user-comment)))
+    (shsx
+     (div: class: "sanitization-test"
+           (h2: "Sanitization Test")
+           (p: "Raw unsafe input: " ,unsafe-input)
+           (p: "Sanitized unsafe input: " ,(sanitize unsafe-input))
+           (p: "User comment: " ,user-comment)
+           (p: "Sanitized comment: " ,sanitized-comment)))))
+
 (define (main . args)
   (displayln "\nSHSX Test Suite")
   (displayln "==============")
@@ -218,4 +230,13 @@
      (test-case "Template predicate"
        (check (shsx-template? (shsx (div:))) => #t)
        (check (shsx-template? '(div:)) => #f)
-       (check (string? (render-html predicate-test)) => #t)))))
+       (check (string? (render-html predicate-test)) => #t))))
+
+  (run-test-suite!
+   (test-suite "Sanitization"
+     (test-case "String sanitization"
+       (check (equal? (sanitize "<script>") "&lt;script&gt;") => #t)
+       (check (equal? (sanitize "a & b") "a &amp; b") => #t)
+       (check (equal? (sanitize "\"quote\" and 'apostrophe'")
+                      "&quot;quote&quot; and &#39;apostrophe&#39;") => #t)
+       (check (string? (render-html sanitize-test)) => #t)))))
